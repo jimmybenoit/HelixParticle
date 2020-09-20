@@ -1,6 +1,8 @@
 package me.jimmybenoit.HelixParticle;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 import org.bukkit.ChatColor;
@@ -19,12 +21,18 @@ import org.bukkit.scheduler.BukkitTask;
 
 public class Main extends JavaPlugin implements Listener {
 	
+	String[] strings = {"ash","barrier","cloud","composter","crimson_spore","crit","crit_magic","current_down","damage_indicator","dragon_breath","drip_lava","drip_water","dripping_honey","dripping_obsidian_tear","enchantment_table","end_rod","falling_lava","falling_nectar","falling_obsidian_tear","falling_water","fireworks_spark","flame","heart","lava","nautilus","note","portal","reverse_portal","slime","smoke_large","smoke_normal","sneeze","soul","soul_fire_flame","spell","spell_instant","spell_mob","spell_mob_ambient","spell_witch","spit","totem","villager_angry","villager_happy"};
+	ArrayList<String> list = new ArrayList<String>();
+	
 	HashMap<UUID, Particle> map = new HashMap<UUID, Particle>();
 	HashMap<UUID, BukkitTask> godpleasework = new HashMap<UUID, BukkitTask>();
 	
 	@Override
 	public void onEnable() {	
 		getServer().getPluginManager().registerEvents(this, this);
+		for(int i = 0; i < strings.length; i++) {
+			list.add(strings[i]);
+		}
 	}
 
 	@Override
@@ -51,6 +59,11 @@ public class Main extends JavaPlugin implements Listener {
 				return true;
 			}
 			
+			if (!(list.contains(args[0].toLowerCase()))) {
+				player.sendMessage(ChatColor.RED + "Please include a valid particle.");
+				return true;
+			}
+			
 			Particle particle;
 			
 			try{
@@ -63,6 +76,7 @@ public class Main extends JavaPlugin implements Listener {
 			
 			if (!(map.containsKey(player.getUniqueId()))) {
 				map.put(player.getUniqueId(), particle);
+				player.sendMessage(ChatColor.GREEN + "Enabled " + args[0].toUpperCase() + " particle.");
 				makeHelix(player);
 				return true;
 			}
@@ -73,6 +87,20 @@ public class Main extends JavaPlugin implements Listener {
 		}
 		
 		return false;
+	}
+	
+	public List<String> onTabComplete(CommandSender sender, Command cmd, String label, String[] args) {
+		if (label.equalsIgnoreCase("helix")) {
+			List<String> autoCompletes = new ArrayList<>();
+			if (args.length == 1){
+				for(int i = 0; i < strings.length; i++) {
+					autoCompletes.add(strings[i]);
+				}
+			}
+			
+			return autoCompletes;
+		}
+		return null;
 	}
 	
 	@EventHandler()
@@ -109,7 +137,11 @@ public class Main extends JavaPlugin implements Listener {
 			double t = 0;
 			public void run(){
 				t = t + Math.PI/8;
-				player.getWorld().spawnParticle(particle, getPoint(t, player.getLocation()), 0);
+				try{
+					player.getWorld().spawnParticle(particle, getPoint(t, player.getLocation()), 0);
+				}catch(Exception exception) {
+					return;
+				}
 				if (!(map.containsKey(player.getUniqueId()))) {
 					this.cancel();
 				}
