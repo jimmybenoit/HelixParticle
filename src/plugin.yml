@@ -1,0 +1,9 @@
+main: me.jimmybenoit.HelixParticle.Main
+name: HelixParticle
+version: 1.0
+author: jimmybenoit
+api-version: 1.13
+
+commands:
+  helix:
+    description: Helix Particle thingy
